@@ -43,3 +43,6 @@ year_data <- sentencing_data %>% group_by(year) %>% summarise(count = sum(count)
 ggplot(data=year_data, aes(x=year, y=count)) + geom_line() + geom_point() + expand_limits(y = 0) + theme_bw()
 ```
 
+# Branch text
+Here is some new work on the branch
+
