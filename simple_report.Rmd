@@ -1,0 +1,45 @@
+---
+title: "Some Report on Sentencing and Stuff"
+author: "Tom Hanks"
+date: "13/11/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- Let's first read in our dataset and get some key values -->
+```{r echo = FALSE, results='hide', message=FALSE}
+library(dplyr)
+library(ggplot2)
+per <- function(num,den){ round(100*num/den)}
+s3tools::get_credentials()
+col_types = readr::cols(
+    year = readr::col_integer(),
+    offence_group = readr::col_character(),
+    sentenced = readr::col_integer(),
+    count = readr::col_integer()
+)
+sentencing_data <- aws.s3::s3read_using(readr::read_csv, col_types = col_types, object = 'simple_data/simple_sentencing_data.csv', bucket = 'alpha-everyone')
+sentencing_data$count2 <- sentencing_data$count
+latest_year <- 2016
+p_5 <- latest_year - 5
+p_10 <- latest_year - 10
+
+# Get some headline values
+total_latest_appear <- sum(sentencing_data[sentencing_data$year == latest_year, 'count'])
+total_latest_sent <- sum(sentencing_data[sentencing_data$year == latest_year & sentencing_data$sentenced == 1, 'count'])
+total_p10_appear <- sum(sentencing_data[sentencing_data$year == p_10, 'count'])
+total_p10_sent <- sum(sentencing_data[sentencing_data$year == p_10 & sentencing_data$sentenced == 1, 'count'])
+
+```
+
+# Sentencing Report
+In `r latest_year` there were `r total_latest_appear` defendants who appeared at court of which `r total_latest_sent` were sentenced (`r per(total_latest_sent, total_latest_appear)`%). The number of defendants sentenced has changed by `r per(total_latest_sent, total_p10_sent) - 100`% from 10 years ago when the number of defendants sentenced was `r total_p10_sent`.
+
+```{r, echo=FALSE}
+year_data <- sentencing_data %>% group_by(year) %>% summarise(count = sum(count))
+ggplot(data=year_data, aes(x=year, y=count)) + geom_line() + geom_point() + expand_limits(y = 0) + theme_bw()
+```
+
