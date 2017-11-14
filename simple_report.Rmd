@@ -49,4 +49,6 @@ Here is some new work on the branch
 # Collaboration
 Some text for sam to work on made by jon
 
+# Controversial opinion
+Tableau is the best!
 
